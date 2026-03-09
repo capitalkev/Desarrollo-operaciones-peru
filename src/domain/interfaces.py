@@ -1,5 +1,7 @@
 from typing import Any, Protocol
 
+from src.domain.models import AuthToken
+
 
 class S3Interface(Protocol):
     """Interface for S3 storage operations."""
@@ -39,3 +41,13 @@ class ContactosInterface(Protocol):
     def add_correo(self, ruc_deudor: str, gmail: str) -> None: ...
 
     def delete_correo(self, ruc_deudor: str, gmail: str) -> None: ...
+
+
+class AuthInterface(Protocol):
+    """Contrato para Auth Seguridad"""
+
+    def verify_token(self, token: str) -> AuthToken: ...
+
+    def find_by_email(self, email): ...
+
+    def create(self, email, nombre: str): ...

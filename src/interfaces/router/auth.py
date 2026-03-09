@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Form, HTTPException
 
 from src.application.auth.sync import SyncFirebase
-from src.domain.models import User
+from src.domain.models import Rol, User
 from src.interfaces.dependencias.auth import get_current_user, get_firebase
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
@@ -34,7 +34,8 @@ async def get_current_user_info(current_user: User = Depends(get_current_user)):
         "rol": current_user.rol,
         "permissions": {
             "is_admin": current_user.is_admin(),
-            "can_access_facturas": current_user.can_access_facturas(),
-            "can_access_verificaciones": current_user.can_access_verificaciones(),
+            "can_manage_users": current_user.is_admin(),
+            "can_manage_operations": current_user.has_any_role([Rol.ADMIN.value, Rol.GESTION.value]),
+            "can_view_sales_data": current_user.has_any_role([Rol.ADMIN.value, Rol.GESTION.value, Rol.VENTAS.value]),
         },
     }

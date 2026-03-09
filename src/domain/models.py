@@ -1,7 +1,14 @@
 from dataclasses import dataclass
 from datetime import datetime
+from enum import Enum
 
 from pydantic import BaseModel
+
+
+class Rol(str, Enum):
+    ADMIN = "admin"
+    GESTION = "gestion"
+    VENTAS = "ventas"
 
 
 class SecuenciaOperacion(BaseModel):
@@ -11,24 +18,14 @@ class SecuenciaOperacion(BaseModel):
 
 @dataclass
 class AuthToken:
-    """
-    Token de autenticación verificado de Firebase.
-    Representa la información del token sin consultar la BD.
-    """
-
     email: str
 
 
 @dataclass
 class User:
-    """
-    Entidad de usuario del dominio.
-    No depende de SQLAlchemy ni de ningún framework.
-    """
-
     email: str
     nombre: str
-    rol: str = "rol1"
+    rol: str = Rol.VENTAS.value
     created_at: datetime | None = None
 
     def __post_init__(self):
@@ -36,17 +33,15 @@ class User:
         if not self.email or "@" not in self.email:
             raise ValueError("Email inválido")
 
-        if self.rol not in ["admin", "rol1", "rol2"]:
-            raise ValueError(f"Rol '{self.rol}' no válido")
+        roles_validos = [r.value for r in Rol]
+        if self.rol not in roles_validos:
+            raise ValueError(
+                f"Rol '{self.rol}' no válido. Debe ser uno de: {roles_validos}"
+            )
 
     def is_admin(self) -> bool:
-        """Regla de negocio: verificar si es admin"""
-        return self.rol == "admin"
+        return self.rol == Rol.ADMIN.value
 
-    def can_access_facturas(self) -> bool:
-        """Regla de negocio: puede acceder a facturas"""
-        return self.rol in ["admin", "rol1"]
-
-    def can_access_verificaciones(self) -> bool:
-        """Regla de negocio: puede acceder a verificaciones"""
-        return self.rol in ["admin", "rol2"]
+    def has_any_role(self, allowed_roles: list[str]) -> bool:
+        """Regla de negocio: verifica si el usuario tiene al menos uno de los roles permitidos"""
+        return self.rol in allowed_roles

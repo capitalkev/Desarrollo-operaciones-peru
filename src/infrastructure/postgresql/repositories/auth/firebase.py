@@ -19,7 +19,7 @@ class AuthRepository(AuthInterface):
                 raise ValueError("Token no contiene email")
             return AuthToken(email=email)
         except Exception as e:
-            raise ValueError(f"Token inválido o expirado: {e!s}")
+            raise ValueError(f"Token inválido o expirado: {e!s}") from None
 
     def find_by_email(self, email: str):
         """Busca un usuario por su email"""
@@ -36,16 +36,15 @@ class AuthRepository(AuthInterface):
             return dict(row._mapping)
         return None
 
-    def create(self, email: str, nombre: str = None):
+    def create(self, email: str, nombre: str):
         """Crea un nuevo usuario en la base de datos"""
-        # Si no se proporciona nombre, usar la parte antes del @ del email
         if not nombre:
             nombre = email.split("@")[0]
 
         sql = """
             INSERT INTO usuarios (email, nombre, rol)
-            VALUES (:email, :nombre, 'rol2')
-            RETURNING id, email, nombre, rol, created_at
+            VALUES (:email, :nombre, 'ventas')
+            RETURNING  email, nombre, rol
         """
         params = {"email": email, "nombre": nombre}
 
