@@ -5,6 +5,8 @@ from fastapi import APIRouter, Depends, File, Form, UploadFile
 
 from src.application.robot.operacion_extractor import RobotOperacionExtractor
 from src.application.robot.operacion_robot import RobotOperacion, RobotOperacionResult
+from src.domain.models import Rol
+from src.interfaces.dependencias.auth import require_roles
 from src.interfaces.dependencias.operaciones import dp_robot_operacion
 
 router = APIRouter(prefix="/robot", tags=["robot"])
@@ -14,6 +16,7 @@ router = APIRouter(prefix="/robot", tags=["robot"])
 async def extraer_deudores(
     action: RobotOperacionExtractor = Depends(RobotOperacionExtractor),
     xml_files: list[UploadFile] = File(...),
+    user = Depends(require_roles([Rol.ADMIN.value, Rol.VENTAS.value])),
 ) -> list[dict[str, Any]]:
     return await action.execute(xml_files)
 
@@ -25,6 +28,7 @@ async def procesar_operacion_completa(
     xml_files: list[UploadFile] = File(...),
     pdf_files: list[UploadFile] = File(...),
     respaldo_files: list[UploadFile] = File([]),
+    user = Depends(require_roles([Rol.ADMIN.value, Rol.VENTAS.value])),
 ) -> RobotOperacionResult:
     data_frontend_dict = json.loads(data_frontend)
     return await action.execute(

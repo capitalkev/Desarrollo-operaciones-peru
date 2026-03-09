@@ -3,7 +3,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from src.domain.interfaces import AuthInterface
-from src.domain.models import AuthToken
+from src.domain.models import AuthToken, Rol
 
 
 class AuthRepository(AuthInterface):
@@ -37,16 +37,15 @@ class AuthRepository(AuthInterface):
         return None
 
     def create(self, email: str, nombre: str):
-        """Crea un nuevo usuario en la base de datos"""
         if not nombre:
             nombre = email.split("@")[0]
 
         sql = """
             INSERT INTO usuarios (email, nombre, rol)
-            VALUES (:email, :nombre, 'ventas')
-            RETURNING  email, nombre, rol
+            VALUES (:email, :nombre, :rol)
+            RETURNING id, email, nombre, rol, created_at
         """
-        params = {"email": email, "nombre": nombre}
+        params = {"email": email, "nombre": nombre, "rol": Rol.VENTAS.value}
 
         try:
             result = self.db.execute(text(sql), params)
