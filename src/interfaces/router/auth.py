@@ -7,16 +7,6 @@ from src.interfaces.dependencias.auth import get_current_user, get_firebase
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
 
-@router.get("/livez")
-def liveness_check():
-    return {"status": "ok"}
-
-
-@router.get("/readyz")
-def readiness_check():
-    return {"status": "ready"}
-
-
 @router.post("/sync")
 async def sync_firebase_user(
     firebase_token: str = Form(...),
