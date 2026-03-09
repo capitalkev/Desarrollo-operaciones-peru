@@ -1,17 +1,13 @@
-"""
-Firebase Admin SDK Initialization
-"""
+import os
 
-import firebase_admin  # type: ignore
-from firebase_admin import credentials  # type: ignore
-
-from src.infrastructure.config import settings
+import firebase_admin
+from firebase_admin import credentials
 
 
 def initialize_firebase():
     """Inicializa Firebase Admin SDK si no está inicializado"""
     if not firebase_admin._apps:
-        cred_dict = settings.get_firebase_credentials()
-        cred = credentials.Certificate(cred_dict)
+        token_path = os.path.join(os.path.dirname(__file__), "serviceAccountKey.json")
+        cred = credentials.Certificate(token_path)
         firebase_admin.initialize_app(cred)
         print("✅ Firebase Admin SDK inicializado correctamente")

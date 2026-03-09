@@ -1,4 +1,4 @@
-from firebase_admin import auth  # type: ignore
+from firebase_admin import auth
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -24,7 +24,7 @@ class AuthRepository(AuthInterface):
     def find_by_email(self, email: str):
         """Busca un usuario por su email"""
         sql = """
-            SELECT id, email, nombre, rol, created_at
+            SELECT email, nombre, rol, ultimo_ingreso
             FROM usuarios
             WHERE email = :email
         """
@@ -43,7 +43,7 @@ class AuthRepository(AuthInterface):
         sql = """
             INSERT INTO usuarios (email, nombre, rol)
             VALUES (:email, :nombre, :rol)
-            RETURNING id, email, nombre, rol, created_at
+            RETURNING email, nombre, rol
         """
         params = {"email": email, "nombre": nombre, "rol": Rol.VENTAS.value}
 

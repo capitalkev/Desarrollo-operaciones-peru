@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from src.infrastructure.auth.firebase_init import initialize_firebase
 from src.interfaces.router import auth, contactos, health, operaciones, robot
 
 
@@ -11,14 +12,16 @@ def create_application() -> FastAPI:
         FastAPI: The configured application instance.
     """
     application = FastAPI(
-        title="Robot Chile",
-        description="Api para el manejo de operaciones y envíos de correos electrónicos.",
+        title="Operaciones SaaS Peru",
+        description="API para la gestión de operaciones en Perú",
         version="1.0.0",
     )
+    initialize_firebase()
 
+    origins = ["http://localhost:5173", "http://127.0.0.1:5173", "*"]
     application.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origins=origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
