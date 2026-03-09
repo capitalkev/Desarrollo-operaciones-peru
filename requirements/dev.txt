@@ -1,0 +1,10 @@
+-r tests.txt
+
+# Linters / type check / tooling
+ruff>=0.7.0
+mypy>=1.10.0
+
+# Typing stubs for common untyped libs (editor-only; not required at runtime)
+types-requests>=2.32.0.20241016
+openpyxl-stubs>=0.1.25
+lxml-stubs>=0.5.1
