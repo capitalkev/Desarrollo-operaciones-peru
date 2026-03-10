@@ -10,15 +10,21 @@ from typing import Any
 import pandas as pd
 from fastapi import UploadFile
 from google.oauth2.credentials import Credentials
-from googleapiclient.discovery import Resource, build
-from googleapiclient.errors import HttpError
+from googleapiclient.discovery import Resource, build  # type: ignore
+from googleapiclient.errors import HttpError  # type: ignore
 
 logger = logging.getLogger(__name__)
 
 SCOPES = ["https://www.googleapis.com/auth/gmail.modify"]
 
 CORREOS_AGENTES = [
+    "jakeline.quispe@capitalexpress.pe",
+    "jenssy.huaman@capitalexpress.pe",
+    "jhonny.celay@capitalexpress.pe",
     "kevin.tupac@capitalexpress.cl",
+    "guillermo.lopez@capitalexpress.pe",
+    "manuel.seminario@capitalexpress.pe",
+    "jose.mego@capitalexpress.pe",
 ]
 
 

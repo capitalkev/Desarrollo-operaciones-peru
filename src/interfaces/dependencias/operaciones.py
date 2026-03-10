@@ -5,6 +5,7 @@ from src.application.operaciones.create_id import CreateIdOperacion
 from src.application.operaciones.create_op import CreateOperacion
 from src.application.operaciones.find import FindFacturas
 from src.application.operaciones.get_all import GetAllOperaciones
+from src.application.robot.operacion_extractor import RobotOperacionExtractor
 from src.application.robot.operacion_robot import RobotOperacion
 from src.infrastructure.postgresql.connection import get_db
 from src.infrastructure.postgresql.repositories.operaciones.operaciones import (
@@ -27,3 +28,7 @@ def dp_operaciones(db: Session = Depends(get_db)) -> GetAllOperaciones:
 def dp_facturas(db: Session = Depends(get_db)) -> FindFacturas:
     repository = OperacionesRepository(db)
     return FindFacturas(repository)
+
+def dp_robot_extractor(db: Session = Depends(get_db)) -> RobotOperacionExtractor:
+    repository = OperacionesRepository(db)
+    return RobotOperacionExtractor(repository)

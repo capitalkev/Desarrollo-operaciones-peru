@@ -89,7 +89,8 @@ class OperacionesRepository(OperacionesInterface):
                     moneda_sumatoria = doc.get("currency", moneda_sumatoria)
                     documentos.append(doc)
 
-            sql_operacion = text("""
+            sql_operacion = text(
+                """
                 UPDATE operaciones
                 SET cliente_ruc = :cliente_ruc,
                     nombre_ejecutivo = :nombre_ejecutivo,
@@ -111,7 +112,8 @@ class OperacionesRepository(OperacionesInterface):
                     nombre_cliente = :nombre_cliente
                 WHERE codigo_operacion = :codigo_operacion
                 RETURNING id;
-            """)
+            """
+            )
 
             params_operacion = {
                 "codigo_operacion": id_op,
@@ -162,7 +164,8 @@ class OperacionesRepository(OperacionesInterface):
                 for inv in cavali_invoices
             }
 
-            sql_factura = text("""
+            sql_factura = text(
+                """
                 INSERT INTO facturas (
                     numero_documento, deudor_ruc, fecha_emision, fecha_vencimiento, moneda,
                     monto_total, monto_neto, mensaje_cavali, id_proceso_cavali, estado, id_operacion, nombre_deudor
@@ -170,7 +173,8 @@ class OperacionesRepository(OperacionesInterface):
                     :numero_documento, :deudor_ruc, :fecha_emision, :fecha_vencimiento, :moneda,
                     :monto_total, :monto_neto, :mensaje_cavali, :id_proceso_cavali, :estado, :id_operacion, :nombre_deudor
                 );
-            """)
+            """
+            )
 
             for doc in documentos:
                 doc_id = doc.get("document_id", "")
@@ -210,9 +214,17 @@ class OperacionesRepository(OperacionesInterface):
         )
         self.db.commit()
 
-    def factura_duplicada(self, numero_factura: str, ruc_deudor: str) -> int:
-        sql = "select codigo_operacion from facturas where numero_documento = :numero_factura and deudor_ruc = :ruc_deudor"
+    def factura_duplicada(self, numero_factura: str, ruc_deudor: str) -> str | None:
+        sql = """
+            SELECT op.codigo_operacion
+            FROM facturas fa
+            JOIN operaciones op ON op.id = fa.id_operacion
+            WHERE fa.numero_documento = :numero_factura
+              AND fa.deudor_ruc = :ruc_deudor
+            LIMIT 1
+        """
         result = self.db.execute(
             text(sql), {"numero_factura": numero_factura, "ruc_deudor": ruc_deudor}
         ).scalar()
-        return result if result is not None else -1
+
+        return result

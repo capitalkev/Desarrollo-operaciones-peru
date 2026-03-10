@@ -155,6 +155,10 @@ class CavaliService:
         response_bloqueo = requests.post(
             self._block_url, json=payload_bloqueo, headers=headers, timeout=300
         )
+
+        if response_bloqueo.status_code != 200:
+            print("ERROR DE CAVALI DETALLADO:", response_bloqueo.text)
+
         response_bloqueo.raise_for_status()
         bloqueo_data: dict[str, Any] = response_bloqueo.json()
 
