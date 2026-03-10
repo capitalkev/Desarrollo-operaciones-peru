@@ -38,7 +38,8 @@ class RobotOperacion:
         respaldo_files: list[Any],
     ) -> RobotOperacionResult:
         # Crear id de la operacion OP-hoy-incremental
-        email_usuario = "kevin.tupac@capitalexpress.cl"
+        notificaciones = data_frontend.get("notificaciones", {})
+        email_usuario = notificaciones.get("correo_remitente", "usuario@desconocido.com")
 
         inicio = time.perf_counter()
         id_op = self.create_id_op.execute(email_usuario)
