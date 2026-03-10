@@ -7,11 +7,10 @@ from sqlalchemy.orm import sessionmaker
 
 load_dotenv()
 
-DB_HOST = os.getenv("DB_HOST")
-DB_NAME = os.getenv("DB_NAME")
-DB_USER = os.getenv("DB_USER")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-INSTANCE_CONNECTION_NAME = os.getenv("INSTANCE_CONNECTION_NAME")
+DB_NAME = os.getenv("DATABASE_NAME")
+DB_USER = os.getenv("DATABASE_USER")
+DB_PASSWORD = os.getenv("DATABASE_PASSWORD")
+INSTANCE_CONNECTION_NAME = os.getenv("CONNECTION_NAME")
 
 if INSTANCE_CONNECTION_NAME:
     connector = Connector()

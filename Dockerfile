@@ -1,17 +1,18 @@
-# Use an official Python runtime as a parent image
-FROM python:3.9-slim
+# Usa la versión 3.10 para soportar la sintaxis moderna de tipos
+FROM python:3.10-slim
 
-# Set the working directory in the container
+# Establece el directorio de trabajo
 WORKDIR /app
 
-# Copy the requirements file into the container at /app
-COPY requirements/requirements.txt .
+# Actualiza pip
+RUN pip install --upgrade pip
 
-# Install any needed packages specified in requirements.txt
+# Copia e instala requerimientos
+COPY requirements/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application's code
-COPY src/ .
+# Copia la carpeta src dentro del contenedor
+COPY src/ src/
 
-# Run main.py when the container launches
-CMD ["python", "main.py"]
+# Ejecuta el servidor uvicorn
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8080"]

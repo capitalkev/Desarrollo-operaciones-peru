@@ -1,5 +1,7 @@
 import time
-from typing import Any, TypedDict
+from typing import Any
+
+from typing_extensions import TypedDict
 
 from src.application.operaciones.create_id import CreateIdOperacion
 from src.application.operaciones.create_op import CreateOperacion
