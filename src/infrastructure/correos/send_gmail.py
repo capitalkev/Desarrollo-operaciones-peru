@@ -47,13 +47,16 @@ class GmailService:
     ) -> bool:
         try:
             service = self.autenticar_gmail()
+            notificaciones = data_frontend.get("notificaciones", {})
+            email_usuario = notificaciones.get("correo_remitente", "usuario@desconocido.com")
             lista_destinatarios = CORREOS_AGENTES
             mensaje = MIMEMultipart()
             destinatarios = mails_verificacion if mails_verificacion is not None else []
             mensaje["to"] = ", ".join(destinatarios)
-            mensaje["cc"] = ", ".join(CORREOS_AGENTES)
+            cc_list = [*CORREOS_AGENTES, email_usuario]
+            cc_final = list(set(cc_list))
+            mensaje["cc"] = ", ".join(cc_final)
             mensaje["from"] = "me"
-            notificaciones = data_frontend.get("notificaciones", {})
             cliente = notificaciones.get("nombre_cliente", "N/A")
             mensaje["subject"] = f"Confirmación de Facturas Negociables - {cliente}"
             html_data = data_frontend if data_frontend is not None else {}
