@@ -80,7 +80,6 @@ class TrelloOperaciones:
         anticipo = cierre.get("porcentaje_adelanto", 0)
         tasa = condiciones.get("tasa", "N/A")
         comision = condiciones.get("comision", "N/A")
-        comentario = cierre.get("comentario", "N/A")
 
         # 2. Procesar Deudores y Moneda
         notificaciones = data_frontend.get("notificaciones", {})
@@ -124,10 +123,10 @@ class TrelloOperaciones:
                 cavali_str = "\n* Pendiente de registro o sin facturas"
         except Exception:
             cavali_str = "\n* Error al procesar datos de CAVALI"
-
+        anticipo_str = f"# ANTICIPO PROPUESTO: {anticipo} %\n\n" if anticipo else ""
         # 5. Construcción del cuerpo (Markdown)
         descripcion = (
-            f"# ANTICIPO PROPUESTO: {anticipo} %\n\n"
+            f"{anticipo_str}"
             f"**ID Operación:** {id_op}\n\n"
             f"**Deudores:**{deudores_str}\n\n"
             f"**Tasa:** {tasa}\n"
@@ -139,10 +138,22 @@ class TrelloOperaciones:
             f"* **Banco:** {banco}\n"
             f"* **N°cuenta:** {n_cuenta}\n"
             f"* **Tipo cuenta:** {tipo_cuenta}\n\n"
-            f"**Comentario:** {comentario}"
         )
 
         return descripcion
+
+    def add_comment_to_card(self, card_id: str, comment_text: str):
+        """Agrega un comentario a una tarjeta existente en Trello"""
+        if not TRELLO_API_KEY or not TRELLO_TOKEN:
+            return None
+
+        url = f"https://api.trello.com/1/cards/{card_id}/actions/comments"
+        params = {"key": TRELLO_API_KEY, "token": TRELLO_TOKEN, "text": comment_text}
+
+        response = requests.post(url, params=params)
+        if response.status_code == 200:
+            return response.json()
+        return None
 
     def attach_files_to_card(self, card_id: str, files: list):
         """

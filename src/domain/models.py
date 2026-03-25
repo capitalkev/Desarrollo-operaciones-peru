@@ -9,6 +9,7 @@ class Rol(str, Enum):
     ADMIN = "admin"
     GESTION = "gestion"
     VENTAS = "ventas"
+    FINANZAS = "finanzas"
 
 
 class SecuenciaOperacion(BaseModel):

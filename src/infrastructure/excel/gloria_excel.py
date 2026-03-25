@@ -39,10 +39,10 @@ class GloriaExcelService:
             row = {
                 "FACTOR": "20603596294",  # String para que Excel no lo convierta a notación científica
                 "FECHA DE ENVIO": fecha_envio,
-                "RUC CLIENTE": invoice.get("client_ruc"),
+                "RUC CLIENTE": invoice.get("debtor_ruc"),
                 "CLIENTE": invoice.get("client_name"),
-                "RUC PROVEEDOR": invoice.get("debtor_ruc"),
-                "PROVEEDOR": invoice.get("debtor_name"),
+                "RUC PROVEEDOR": invoice.get("client_ruc"),
+                "PROVEEDOR": (invoice.get("debtor_name") or "").replace("-", " ").replace(".", ""),
                 "FECHA DE EMISION": (
                     issue_date.strftime("%d.%m.%Y") if pd.notna(issue_date) else ""
                 ),

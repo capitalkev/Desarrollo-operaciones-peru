@@ -24,6 +24,11 @@ class TrelloOperacion:
 
         card_id = self.repository.trello_card(title, descripcion)
 
+        comentario = data_frontend.get("cierre", {}).get("comentario", "").strip()
+        if card_id and comentario and comentario != "N/A":
+            texto_comentario = f"Comentario del Ejecutivo:\n{comentario}"
+            self.repository.add_comment_to_card(card_id, texto_comentario)
+
         attachments_result = None
         if card_id and trello_archivos:
             attachments_result = self.repository.attach_files_to_card(

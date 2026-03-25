@@ -15,19 +15,35 @@ router = APIRouter(prefix="/contactos", tags=["contactos"])
 
 
 @router.get("/{ruc_deudor}")
-def extraer_deudores(ruc_deudor: str, action: GetContacto = Depends(dp_contactos), user = Depends(require_roles([Rol.ADMIN.value, Rol.VENTAS.value]))):
+def extraer_deudores(
+    ruc_deudor: str,
+    action: GetContacto = Depends(dp_contactos),
+    user=Depends(
+        require_roles([Rol.ADMIN.value, Rol.VENTAS.value, Rol.FINANZAS.value])
+    ),
+):
     return action.execute(ruc_deudor)
 
 
 @router.post("/{ruc_deudor}/{gmail}")
 def add_correo(
-    ruc_deudor: str, gmail: str, action: AddContacto = Depends(dp_add_contactos), user = Depends(require_roles([Rol.ADMIN.value, Rol.VENTAS.value]))
+    ruc_deudor: str,
+    gmail: str,
+    action: AddContacto = Depends(dp_add_contactos),
+    user=Depends(
+        require_roles([Rol.ADMIN.value, Rol.VENTAS.value, Rol.FINANZAS.value])
+    ),
 ):
     return action.execute(ruc_deudor, gmail)
 
 
 @router.delete("/{ruc_deudor}/{gmail}")
 def delete_correo(
-    ruc_deudor: str, gmail: str, action: DeleteContacto = Depends(dp_delete_contactos), user = Depends(require_roles([Rol.ADMIN.value, Rol.VENTAS.value]))
+    ruc_deudor: str,
+    gmail: str,
+    action: DeleteContacto = Depends(dp_delete_contactos),
+    user=Depends(
+        require_roles([Rol.ADMIN.value, Rol.VENTAS.value, Rol.FINANZAS.value])
+    ),
 ):
     return action.execute(ruc_deudor, gmail)
