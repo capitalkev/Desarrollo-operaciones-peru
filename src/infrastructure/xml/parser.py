@@ -171,6 +171,7 @@ def extract_invoice_data(xml_content_bytes: bytes) -> dict:
     total_amount_str = _xpath_text(
         root, ".//cac:LegalMonetaryTotal/cbc:PayableAmount", "0"
     )
+
     total_amount, total_amount_error = _parse_float(
         total_amount_str, field_name="total_amount"
     )
@@ -200,7 +201,8 @@ def extract_invoice_data(xml_content_bytes: bytes) -> dict:
             "error": f"Detracción fuera de rango (0-100): {detraction_amount}",
             "valid": False,
         }
-
+    if detraction_amount < 1:
+        detraction_amount *= 100
     net_amount = total_amount * (100 - detraction_amount) / 100
 
     return {
