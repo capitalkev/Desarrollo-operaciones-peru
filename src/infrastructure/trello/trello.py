@@ -58,7 +58,7 @@ class TrelloOperaciones:
         # Obtener nombre del ejecutivo
         ejecutivo_nombre = "N/A"
         if usuario_email:
-            ejecutivo_nombre = usuario_email.split("@")[0].split(".")[0].capitalize()
+            ejecutivo_nombre = usuario_email.split("@")[0].capitalize()
 
         # Nombres de deudores simplificados para el título
         nombres_deudores = " - ".join([d.get("nombre") for d in deudores])

@@ -37,12 +37,14 @@ class GloriaExcelService:
             due_date = pd.to_datetime(invoice.get("due_date"), errors="coerce")
 
             row = {
-                "FACTOR": "20603596294",  # String para que Excel no lo convierta a notación científica
+                "FACTOR": "20603596294",
                 "FECHA DE ENVIO": fecha_envio,
-                "RUC CLIENTE": invoice.get("debtor_ruc"),
-                "CLIENTE": invoice.get("client_name"),
                 "RUC PROVEEDOR": invoice.get("client_ruc"),
-                "PROVEEDOR": (invoice.get("debtor_name") or "").replace("-", " ").replace(".", ""),
+                "PROVEEDOR": invoice.get("client_name"),
+                "RUC CLIENTE": invoice.get("debtor_ruc"),
+                "CLIENTE": (invoice.get("debtor_name") or "")
+                .replace("-", " ")
+                .replace(".", ""),
                 "FECHA DE EMISION": (
                     issue_date.strftime("%d.%m.%Y") if pd.notna(issue_date) else ""
                 ),
