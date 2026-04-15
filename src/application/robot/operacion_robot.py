@@ -35,7 +35,7 @@ class RobotOperacion:
         self.create_id_op = create_id_op
         self.guardar_op = guardar_op
 
-    async def execute(
+    def execute(
         self,
         data_frontend: dict[str, Any],
         xml_files: list[Any],

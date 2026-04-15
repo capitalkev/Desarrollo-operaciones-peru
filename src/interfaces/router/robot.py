@@ -25,7 +25,7 @@ async def extraer_deudores(
 
 
 @router.post("/procesar-completa")
-async def procesar_operacion_completa(
+def procesar_operacion_completa(
     action: RobotOperacion = Depends(dp_robot_operacion),
     data_frontend: str = Form(...),
     xml_files: list[UploadFile] = File(...),
@@ -34,7 +34,7 @@ async def procesar_operacion_completa(
     user=Depends(require_roles([Rol.ADMIN.value, Rol.VENTAS.value])),
 ) -> RobotOperacionResult:
     data_frontend_dict = json.loads(data_frontend)
-    return await action.execute(
+    return action.execute(
         xml_files=xml_files,
         pdf_files=pdf_files,
         respaldo_files=respaldo_files,

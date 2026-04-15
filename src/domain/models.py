@@ -10,7 +10,7 @@ class Rol(str, Enum):
     GESTION = "gestion"
     VENTAS = "ventas"
     FINANZAS = "finanzas"
-
+    SIN_ASIGNAR = "sin_asignar"
 
 class SecuenciaOperacion(BaseModel):
     fecha: str
@@ -26,7 +26,7 @@ class AuthToken:
 class User:
     email: str
     nombre: str
-    rol: str = Rol.VENTAS.value
+    rol: str = Rol.SIN_ASIGNAR.value
     created_at: datetime | None = None
 
     def __post_init__(self):

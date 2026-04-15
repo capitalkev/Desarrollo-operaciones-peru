@@ -1,33 +1,14 @@
-from fastapi import APIRouter, Depends, Form, HTTPException
+from fastapi import APIRouter, Depends
 
-from src.application.auth.sync import SyncFirebase
 from src.domain.models import Rol, User
-from src.interfaces.dependencias.auth import get_current_user, get_firebase
+from src.interfaces.dependencias.auth import get_current_user
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
 
-@router.post("/sync")
-async def sync_firebase_user(
-    firebase_token: str = Form(...),
-    nombre: str = Form(None),
-    action: SyncFirebase = Depends(get_firebase),
-):
-    """
-    Sincroniza un usuario de Firebase con la base de datos.
-    Si el usuario no existe, lo crea con rol 'User' por defecto.
-    """
-    try:
-        result = action.execute(firebase_token, nombre)
-        user = result["user"]
-
-        return {"email": user["email"], "nombre": user["nombre"], "rol": user["rol"]}
-    except ValueError as e:
-        raise HTTPException(status_code=401, detail=str(e)) from None
-
-
 @router.get("/me")
 async def get_current_user_info(current_user: User = Depends(get_current_user)):
+    """Retorna la información del usuario basada puramente en el JWT de Cognito"""
     return {
         "email": current_user.email,
         "nombre": current_user.nombre,
@@ -35,7 +16,11 @@ async def get_current_user_info(current_user: User = Depends(get_current_user)):
         "permissions": {
             "is_admin": current_user.is_admin(),
             "can_manage_users": current_user.is_admin(),
-            "can_manage_operations": current_user.has_any_role([Rol.ADMIN.value, Rol.GESTION.value]),
-            "can_view_sales_data": current_user.has_any_role([Rol.ADMIN.value, Rol.GESTION.value, Rol.VENTAS.value]),
+            "can_manage_operations": current_user.has_any_role(
+                [Rol.ADMIN.value, Rol.GESTION.value]
+            ),
+            "can_view_sales_data": current_user.has_any_role(
+                [Rol.ADMIN.value, Rol.GESTION.value, Rol.VENTAS.value]
+            ),
         },
     }
