@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from fastapi import Depends
 from sqlalchemy.orm import Session
 
@@ -12,24 +14,22 @@ from src.infrastructure.postgresql.repositories.operaciones.operaciones import (
     OperacionesRepository,
 )
 
+DBSession = Annotated[Session, Depends(get_db)]
 
-def dp_robot_operacion(db: Session = Depends(get_db)) -> RobotOperacion:
-    repository = OperacionesRepository(db)
-    create_id_op = CreateIdOperacion(repository)
-    guardar_op = CreateOperacion(repository)
+
+def dp_robot_operacion(db: DBSession) -> RobotOperacion:
+    create_id_op = CreateIdOperacion(repository=OperacionesRepository(db))
+    guardar_op = CreateOperacion(repository=OperacionesRepository(db))
     return RobotOperacion(create_id_op=create_id_op, guardar_op=guardar_op)
 
 
-def dp_operaciones(db: Session = Depends(get_db)) -> GetAllOperaciones:
-    repository = OperacionesRepository(db)
-    return GetAllOperaciones(repository)
+def dp_operaciones(db: DBSession) -> GetAllOperaciones:
+    return GetAllOperaciones(repository=OperacionesRepository(db))
 
 
-def dp_facturas(db: Session = Depends(get_db)) -> FindFacturas:
-    repository = OperacionesRepository(db)
-    return FindFacturas(repository)
+def dp_facturas(db: DBSession) -> FindFacturas:
+    return FindFacturas(repository=OperacionesRepository(db))
 
 
-def dp_robot_extractor(db: Session = Depends(get_db)) -> RobotOperacionExtractor:
-    repository = OperacionesRepository(db)
-    return RobotOperacionExtractor(repository)
+def dp_robot_extractor(db: DBSession) -> RobotOperacionExtractor:
+    return RobotOperacionExtractor(repository=OperacionesRepository(db))

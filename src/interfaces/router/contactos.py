@@ -1,3 +1,4 @@
+from capitalexpress_auth import User
 from fastapi import APIRouter, Depends
 
 from src.application.contactos.add_contacto import AddContacto
@@ -17,8 +18,8 @@ router = APIRouter(prefix="/contactos", tags=["contactos"])
 def extraer_deudores(
     ruc_deudor: str,
     action: GetContacto = Depends(dp_contactos),
-    user=Depends(require_roles(["admin", "ventas", "finanzas"])),
-):
+    user: User = Depends(require_roles(["admin", "ventas", "finanzas"])),
+) -> list[dict]:
     return action.execute(ruc_deudor)
 
 
@@ -27,8 +28,8 @@ def add_correo(
     ruc_deudor: str,
     gmail: str,
     action: AddContacto = Depends(dp_add_contactos),
-    user=Depends(require_roles(["admin", "ventas", "finanzas"])),
-):
+    user: User = Depends(require_roles(["admin", "ventas", "finanzas"])),
+) -> None:
     return action.execute(ruc_deudor, gmail)
 
 
@@ -37,6 +38,6 @@ def delete_correo(
     ruc_deudor: str,
     gmail: str,
     action: DeleteContacto = Depends(dp_delete_contactos),
-    user=Depends(require_roles(["admin", "ventas", "finanzas"])),
-):
+    user: User = Depends(require_roles(["admin", "ventas", "finanzas"])),
+) -> None:
     return action.execute(ruc_deudor, gmail)

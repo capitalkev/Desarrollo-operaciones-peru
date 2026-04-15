@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from src.config import settings
 from src.interfaces.router import contactos, health, operaciones, robot
 
 
@@ -16,10 +17,9 @@ def create_application() -> FastAPI:
         version="1.0.0",
     )
 
-    origins = ["http://localhost:5173", "https://operaciones-capitalexpress.web.app", "*"]
     application.add_middleware(
         CORSMiddleware,
-        allow_origins=origins,
+        allow_origins=settings.parsed_cors_origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

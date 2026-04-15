@@ -6,4 +6,4 @@ class DeleteContacto:
         self.repository = repository
 
     def execute(self, ruc_deudor: str, gmail: str) -> None:
-        self.repository.delete_correo(ruc_deudor, gmail)
+        return self.repository.delete_correo(ruc_deudor, gmail)

@@ -1,6 +1,7 @@
 import json
 from typing import Any
 
+from capitalexpress_auth import User
 from fastapi import APIRouter, Depends, File, Form, UploadFile
 
 from src.application.robot.operacion_extractor import RobotOperacionExtractor
@@ -18,7 +19,7 @@ router = APIRouter(prefix="/robot", tags=["robot"])
 async def extraer_deudores(
     action: RobotOperacionExtractor = Depends(dp_robot_extractor),
     xml_files: list[UploadFile] = File(...),
-    user=Depends(require_roles(["admin", "ventas"])),
+    user: User = Depends(require_roles(["admin", "ventas"])),
 ) -> list[dict[str, Any]]:
     return await action.execute(xml_files)
 
@@ -30,7 +31,7 @@ def procesar_operacion_completa(
     xml_files: list[UploadFile] = File(...),
     pdf_files: list[UploadFile] = File(...),
     respaldo_files: list[UploadFile] = File([]),
-    user=Depends(require_roles(["admin", "ventas"])),
+    user: User = Depends(require_roles(["admin", "ventas"])),
 ) -> RobotOperacionResult:
     data_frontend_dict = json.loads(data_frontend)
     return action.execute(
