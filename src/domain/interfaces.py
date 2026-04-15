@@ -1,7 +1,5 @@
 from typing import Any, Protocol
 
-from src.domain.models import AuthToken
-
 
 class S3Interface(Protocol):
     """Interface for S3 storage operations."""

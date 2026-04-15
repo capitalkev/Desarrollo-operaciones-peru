@@ -20,3 +20,4 @@ pandas>=2.0.0
 boto3
 httpx
 python-jose[cryptography]
+pydantic-settings
