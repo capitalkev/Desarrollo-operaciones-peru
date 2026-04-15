@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.interfaces.router import auth, contactos, health, operaciones, robot
+from src.interfaces.router import contactos, health, operaciones, robot
 
 
 def create_application() -> FastAPI:
@@ -24,7 +24,6 @@ def create_application() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    application.include_router(auth.router)
     application.include_router(robot.router)
     application.include_router(operaciones.router)
     application.include_router(contactos.router)

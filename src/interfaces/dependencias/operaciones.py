@@ -29,6 +29,7 @@ def dp_facturas(db: Session = Depends(get_db)) -> FindFacturas:
     repository = OperacionesRepository(db)
     return FindFacturas(repository)
 
+
 def dp_robot_extractor(db: Session = Depends(get_db)) -> RobotOperacionExtractor:
     repository = OperacionesRepository(db)
     return RobotOperacionExtractor(repository)
