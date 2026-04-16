@@ -15,5 +15,11 @@ class Settings(BaseSettings):
     def parsed_api_keys(self) -> list[str]:
         return [key.strip() for key in self.api_keys.split(",") if key.strip()]
 
-
+    @property
+    def parsed_domains(self) -> list[str]:
+        return [
+            domain.strip()
+            for domain in self.allowed_email_domains.split(",")
+            if domain.strip()
+        ]
 settings = Settings()
