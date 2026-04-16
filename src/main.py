@@ -1,12 +1,10 @@
+import json
 import os
 
 from dotenv import load_dotenv
-import json
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.config import settings
 from src.interfaces.router import contactos, health, operaciones, robot
 
 load_dotenv()
