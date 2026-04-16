@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from src.config import settings
+from src.interfaces.middleware.api_key_auth import ApiKeyMiddleware
 from src.interfaces.router import contactos, health, operaciones, robot
 
 load_dotenv()
@@ -39,7 +41,7 @@ def create_application() -> FastAPI:
         description="API para la gestión de operaciones en Perú",
         version="1.0.0",
     )
-
+    app.add_middleware(ApiKeyMiddleware, api_keys=settings.parsed_api_keys)
     application.add_middleware(
         CORSMiddleware,
         allow_origins=_parse_cors_allow_origins(CORS_ALLOW_ORIGINS),
