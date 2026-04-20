@@ -41,7 +41,7 @@ def create_application() -> FastAPI:
         description="API para la gestión de operaciones en Perú",
         version="1.0.0",
     )
-    app.add_middleware(ApiKeyMiddleware, api_keys=settings.parsed_api_keys)
+    application.add_middleware(ApiKeyMiddleware, api_keys=settings.parsed_api_keys)
     application.add_middleware(
         CORSMiddleware,
         allow_origins=_parse_cors_allow_origins(CORS_ALLOW_ORIGINS),
