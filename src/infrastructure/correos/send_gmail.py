@@ -8,6 +8,7 @@ from email.mime.text import MIMEText
 from typing import Any
 
 import pandas as pd
+from dotenv import load_dotenv
 from fastapi import UploadFile
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import Resource, build  # type: ignore
@@ -17,15 +18,10 @@ logger = logging.getLogger(__name__)
 
 SCOPES = ["https://www.googleapis.com/auth/gmail.modify"]
 
-CORREOS_AGENTES = [
-    "jakeline.quispe@capitalexpress.pe",
-    "jenssy.huaman@capitalexpress.pe",
-    "jhonny.celay@capitalexpress.pe",
-    "kevin.tupac@capitalexpress.cl",
-    "guillermo.lopez@capitalexpress.pe",
-    "manuel.seminario@capitalexpress.pe",
-    "jose.mego@capitalexpress.pe",
-]
+
+load_dotenv()
+
+CORREOS_AGENTES = os.getenv("CORREOS_AGENTES")
 
 
 class GmailService:
@@ -48,7 +44,9 @@ class GmailService:
         try:
             service = self.autenticar_gmail()
             notificaciones = data_frontend.get("notificaciones", {})
-            email_usuario = notificaciones.get("correo_remitente", "usuario@desconocido.com")
+            email_usuario = notificaciones.get(
+                "correo_remitente", "usuario@desconocido.com"
+            )
             lista_destinatarios = CORREOS_AGENTES
             mensaje = MIMEMultipart()
             destinatarios = mails_verificacion if mails_verificacion is not None else []

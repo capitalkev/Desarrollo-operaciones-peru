@@ -50,8 +50,6 @@ class OperacionesRepository(OperacionesInterface):
                 "No se pudo registrar la operación debido a un error de integridad."
             ) from e
 
-    # src/infrastructure/postgresql/repositories/operaciones/operaciones.py (Línea ~43)
-
     def get_operaciones(self, gmail: str, is_admin: bool = False) -> list[dict]:
         if is_admin:
             sql = "SELECT * FROM operaciones WHERE estado != 'Otros' order by fecha_creacion desc limit 500"

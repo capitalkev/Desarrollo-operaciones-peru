@@ -1,3 +1,5 @@
+from typing import Any, cast
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -16,4 +18,4 @@ class Settings(BaseSettings):
         return [key.strip() for key in self.api_keys.split(",") if key.strip()]
 
 
-settings = Settings()
+settings: Settings = cast(Any, Settings)()

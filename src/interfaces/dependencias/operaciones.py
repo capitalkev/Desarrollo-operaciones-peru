@@ -32,4 +32,4 @@ def dp_facturas(db: DBSession) -> FindFacturas:
 
 
 def dp_robot_extractor(db: DBSession) -> RobotOperacionExtractor:
-    return RobotOperacionExtractor(repository=OperacionesRepository(db))
+    return RobotOperacionExtractor(operaciones_repo=OperacionesRepository(db))

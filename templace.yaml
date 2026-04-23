@@ -1,0 +1,97 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: This SAM template provisions AWS SNS Topic and SQS Queues for Operations processing.
+
+Parameters:
+  EventsProcessEndpoint:
+    Type: String
+    Description: Public HTTPS endpoint that receives SNS messages (e.g. https://api.example.com/api/v1/events/operations/closed)
+  EventsOperationAttachmentCategorizeEndpoint:
+    Type: String
+    Description: Public HTTPS endpoint that receives SNS messages
+
+Resources:
+  # ==========================================
+  # 1. TÓPICOS SNS (Lo que te pasó tu jefe)
+  # ==========================================
+  operationMoveToNew:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "${AWS::StackName}-move-to-new"
+
+  operationClosed:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "${AWS::StackName}-closed"
+
+  operationClosedSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref operationClosed
+      Protocol: https
+      Endpoint: !Ref EventsProcessEndpoint
+
+  operationMoveToInVerification:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "${AWS::StackName}-move-to-in-verification"
+
+  operationAttachmentCreated:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "${AWS::StackName}-operation-attachment-created"
+
+  operationAttachmentCreatedSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref operationAttachmentCreated
+      Protocol: https
+      Endpoint: !Ref EventsOperationAttachmentCategorizeEndpoint
+
+  # ==========================================
+  # 2. COLAS SQS (Lo que tú agregas para el Robot)
+  # ==========================================
+  
+  # A. La Cola de Mensajes Muertos (DLQ)
+  RobotOperacionesDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub "${AWS::StackName}-robot-operaciones-dlq"
+
+  # B. La Cola Principal (Donde tu Worker va a escuchar)
+  RobotOperacionesQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub "${AWS::StackName}-robot-operaciones-queue"
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt RobotOperacionesDLQ.Arn
+        maxReceiveCount: 3 # Si el worker falla 3 veces, lo manda al DLQ
+
+  # ==========================================
+  # 3. CONECTAR SNS CON SQS (Patrón Fanout)
+  # ==========================================
+  
+  # Suscribimos nuestra Cola SQS al Tópico SNS "operationMoveToNew"
+  RobotOperacionesQueueSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref operationMoveToNew
+      Protocol: sqs
+      Endpoint: !GetAtt RobotOperacionesQueue.Arn
+
+  # Permiso para que el Tópico SNS pueda escribir en la Cola SQS
+  RobotOperacionesQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+        - !Ref RobotOperacionesQueue
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: "*"
+            Action: sqs:SendMessage
+            Resource: !GetAtt RobotOperacionesQueue.Arn
+            Condition:
+              ArnEquals:
+                aws:SourceArn: !Ref operationMoveToNew

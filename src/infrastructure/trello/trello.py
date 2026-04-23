@@ -15,7 +15,7 @@ TRELLO_LIST_ID = os.getenv("TRELLO_LIST_ID")
 
 
 class TrelloOperaciones:
-    def trello_card(self, title, descripcion):
+    def trello_card(self, title, descripcion) -> str | None:
         if not TRELLO_API_KEY or not TRELLO_TOKEN or not TRELLO_LIST_ID:
             print("Error: Faltan las variables de entorno necesarias para Trello.")
             return None
@@ -36,7 +36,7 @@ class TrelloOperaciones:
 
         return card_id
 
-    def trello_title(self, data_frontend, id_op):
+    def trello_title(self, data_frontend, id_op) -> str:
         notificaciones = data_frontend.get("notificaciones", {})
         cliente_name = notificaciones.get("nombre_cliente", "N/A")
         deudores = notificaciones.get("deudores", [])
@@ -72,7 +72,7 @@ class TrelloOperaciones:
         data_frontend,
         id_op,
         drive_folder_urlstr,
-    ):
+    ) -> str:
         # 1. Datos de Cierre y Condiciones
         cierre = data_frontend.get("cierre", {})
         condiciones = data_frontend.get("condiciones", {})
@@ -142,7 +142,7 @@ class TrelloOperaciones:
 
         return descripcion
 
-    def add_comment_to_card(self, card_id: str, comment_text: str):
+    def add_comment_to_card(self, card_id: str, comment_text: str) -> dict | None:
         """Agrega un comentario a una tarjeta existente en Trello"""
         if not TRELLO_API_KEY or not TRELLO_TOKEN:
             return None
@@ -155,7 +155,7 @@ class TrelloOperaciones:
             return response.json()
         return None
 
-    def attach_files_to_card(self, card_id: str, files: list):
+    def attach_files_to_card(self, card_id: str, files: list) -> dict:
         """
         Adjunta archivos a una tarjeta de Trello.
 
