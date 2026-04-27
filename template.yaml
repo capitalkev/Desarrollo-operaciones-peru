@@ -11,9 +11,6 @@ Parameters:
     Description: Public HTTPS endpoint that receives SNS messages
 
 Resources:
-  # ==========================================
-  # 1. TÓPICOS SNS (Lo que te pasó tu jefe)
-  # ==========================================
   operationMoveToNew:
     Type: AWS::SNS::Topic
     Properties:
@@ -48,30 +45,18 @@ Resources:
       Protocol: https
       Endpoint: !Ref EventsOperationAttachmentCategorizeEndpoint
 
-  # ==========================================
-  # 2. COLAS SQS (Lo que tú agregas para el Robot)
-  # ==========================================
-  
-  # A. La Cola de Mensajes Muertos (DLQ)
   RobotOperacionesDLQ:
     Type: AWS::SQS::Queue
     Properties:
       QueueName: !Sub "${AWS::StackName}-robot-operaciones-dlq"
 
-  # B. La Cola Principal (Donde tu Worker va a escuchar)
   RobotOperacionesQueue:
     Type: AWS::SQS::Queue
     Properties:
       QueueName: !Sub "${AWS::StackName}-robot-operaciones-queue"
       RedrivePolicy:
         deadLetterTargetArn: !GetAtt RobotOperacionesDLQ.Arn
-        maxReceiveCount: 3 # Si el worker falla 3 veces, lo manda al DLQ
-
-  # ==========================================
-  # 3. CONECTAR SNS CON SQS (Patrón Fanout)
-  # ==========================================
-  
-  # Suscribimos nuestra Cola SQS al Tópico SNS "operationMoveToNew"
+        maxReceiveCount: 3
   RobotOperacionesQueueSubscription:
     Type: AWS::SNS::Subscription
     Properties:
@@ -79,7 +64,6 @@ Resources:
       Protocol: sqs
       Endpoint: !GetAtt RobotOperacionesQueue.Arn
 
-  # Permiso para que el Tópico SNS pueda escribir en la Cola SQS
   RobotOperacionesQueuePolicy:
     Type: AWS::SQS::QueuePolicy
     Properties:

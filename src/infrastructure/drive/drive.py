@@ -6,7 +6,6 @@ from google.auth.credentials import Credentials
 from google.oauth2 import service_account
 from googleapiclient.discovery import Resource, build
 from googleapiclient.http import MediaIoBaseUpload
-from starlette.datastructures import UploadFile
 
 DRIVE_SCOPES = ["https://www.googleapis.com/auth/drive"]
 
@@ -94,7 +93,7 @@ class DriveService:
     def upload_to_folder(
         self,
         service: Resource,
-        files: list[UploadFile],
+        files: list[Any],
         carpeta_hijo: str,
     ) -> dict[str, Any]:
         uploaded_files: list[dict[str, Any]] = []
@@ -105,7 +104,7 @@ class DriveService:
                 filename = upload.filename or "upload.bin"
                 upload.file.seek(0)
                 content = upload.file.read()
-                mime_type = upload.content_type or "application/octet-stream"
+                mime_type = getattr(upload, "content_type", "application/octet-stream")
 
                 result = self.upload_file_to_drive(
                     service, content, filename, carpeta_hijo, mime_type

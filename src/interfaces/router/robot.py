@@ -1,15 +1,14 @@
 import json
+import os
 from typing import Any
 
+import boto3
 from capitalexpress_auth import User
 from fastapi import APIRouter, Depends, File, Form, UploadFile
 
-from src.application.robot.cavali_robot import CavaliOperacion
-from src.application.robot.correo_robot import CorreoOperacion
-from src.application.robot.drive_robot import DriveOperacion
 from src.application.robot.operacion_extractor import RobotOperacionExtractor
 from src.application.robot.operacion_robot import RobotOperacion
-from src.application.robot.trello_robot import TrelloOperacion
+from src.infrastructure.storage.s3_storage_service import S3Service
 from src.interfaces.dependencias.auth import require_roles
 from src.interfaces.dependencias.operaciones import (
     dp_robot_extractor,
@@ -29,87 +28,52 @@ async def extraer_deudores(
 
 
 @router.post("/procesar-completa")
-def procesar_operacion_completa(
+async def procesar_operacion_completa(
     action: RobotOperacion = Depends(dp_robot_operacion),
     data_frontend: str = Form(...),
-    user: User = Depends(require_roles(["admin", "ventas"])),
-) -> str:
-    data_frontend_dict = json.loads(data_frontend)
-    return action.execute(
-        data_frontend=data_frontend_dict,
-    )
-
-
-@router.post("/cavali")
-def procesar_cavali(
-    xml_files: list[UploadFile] = File(...),
-) -> dict[str, Any]:
-    cavali = CavaliOperacion()
-    return cavali.execute(xml_files)
-
-
-@router.post("/correo")
-def procesar_correo(
-    data_frontend: str = Form(...),
-    pdf_files: list[UploadFile] = File(...),
-    id_op: str = Form(...),
-) -> dict[str, Any]:
-    data_frontend = json.loads(data_frontend)
-    correo = CorreoOperacion()
-    return correo._enviar_correos_verificacion(data_frontend, id_op, pdf_files)
-
-
-@router.post("/drive")
-def procesar_drive(
-    id_op: str = Form(...),
-) -> dict[str, Any]:
-    drive = DriveOperacion()
-    return drive.execute_primero(operacion_id=id_op)
-
-
-@router.post("/secundario-drive")
-def procesar_secundario_drive(
-    carpeta_hijo: str = Form(...),
     xml_files: list[UploadFile] = File(...),
     pdf_files: list[UploadFile] = File(...),
     respaldo_files: list[UploadFile] = File([]),
-) -> dict[str, Any]:
-    drive = DriveOperacion()
-    all_archivos = xml_files + pdf_files + respaldo_files
-    return drive.execute_secundario(documentos=all_archivos, carpeta_hijo=carpeta_hijo)
-
-
-@router.post("/trello")
-def procesar_trello(
-    id_op: str = Form(...),
-    pdf_files: list[UploadFile] = File(...),
-    respaldo_files: list[UploadFile] = File([]),
-    url_drive_str: str = Form(...),
-    cavali_resultados: str = Form(...),
-    data_frontend: str = Form(...),
-) -> dict[str, Any]:
-    trello = TrelloOperacion()
-    trello_archivos = pdf_files + respaldo_files
-    data_frontend = json.loads(data_frontend)
-    return trello.execute(
-        data_frontend,
-        id_op,
-        trello_archivos,
-        url_drive=url_drive_str,
-        cavali_resultados=cavali_resultados,
-    )
-
-
-@router.post("/guardar-operacion")
-def guardar_operacion(
-    action: RobotOperacion = Depends(dp_robot_operacion),
-    data_frontend: str = Form(...),
-    id_op: str = Form(...),
     user: User = Depends(require_roles(["admin", "ventas"])),
 ) -> dict[str, Any]:
+
     data_frontend_dict = json.loads(data_frontend)
-    result = {
-        "data_frontend": data_frontend_dict,
+    id_op = action.execute(data_frontend_dict)
+
+    # 1. Subir archivos a S3
+    s3_service = S3Service(bucket_name=os.getenv("AWS_S3_BUCKET_NAME"))
+    archivos_s3 = {"xmls": [], "pdfs": [], "respaldos": []}
+
+    # Función auxiliar para no repetir código
+    async def upload_files(file_list, category):
+        for f in file_list:
+            content = await f.read()
+            key = f"temporales/{id_op}/{category}/{f.filename}"
+            s3_service.upload_file(content, key=key, content_type=f.content_type)
+            archivos_s3[category].append(
+                {"filename": f.filename, "key": key, "content_type": f.content_type}
+            )
+
+    await upload_files(xml_files, "xmls")
+    await upload_files(pdf_files, "pdfs")
+    await upload_files(respaldo_files, "respaldos")
+
+    sns_client = boto3.client("sns", region_name=os.getenv("AWS_REGION", "us-east-1"))
+    topic_arn = os.getenv(
+        "SNS_TOPIC_MOVE_TO_NEW_ARN", "arn:aws:sns:REGION:ACCOUNT:NOMBRE_DEL_TOPICO"
+    )
+
+    mensaje_sns = {
         "id_op": id_op,
+        "data_frontend": data_frontend_dict,
+        "archivos_s3": archivos_s3,
     }
-    return action.guardar_op.execute(result, id_op)
+
+    sns_client.publish(TopicArn=topic_arn, Message=json.dumps(mensaje_sns))
+
+    # 3. Respuesta Inmediata
+    return {
+        "status": "success",
+        "id_op": id_op,
+        "message": "Operación recibida. Procesándose en segundo plano.",
+    }
